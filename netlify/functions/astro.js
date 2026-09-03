@@ -44,11 +44,12 @@ const json = (statusCode, body) => ({
 });
 
 exports.handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") return json(204, {});
-  if (event.httpMethod !== "POST") return json(405, { error: "Método no permitido." });
   const groqApiKey = process.env.GROQ_API_KEY || process.env.groq;
 
-if (!groqApiKey)
+  if (event.httpMethod === "OPTIONS") return json(204, {});
+  if (event.httpMethod !== "POST") return json(405, { error: "Método no permitido." });
+  if (!groqApiKey) return json(503, { error: "IA-Astro todavía no fue configurada." });
+
   try {
     const payload = JSON.parse(event.body || "{}");
     const message = String(payload.message || "").trim();
@@ -106,4 +107,3 @@ if (!groqApiKey)
     return json(500, { error: "No pudimos procesar la consulta." });
   }
 };
-
