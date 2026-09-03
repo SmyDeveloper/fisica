@@ -46,8 +46,9 @@ const json = (statusCode, body) => ({
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return json(204, {});
   if (event.httpMethod !== "POST") return json(405, { error: "Método no permitido." });
-  if (!process.env.GROQ_API_KEY) return json(503, { error: "IA-Astro todavía no fue configurada." });
+  const groqApiKey = process.env.GROQ_API_KEY || process.env.groq;
 
+if (!groqApiKey)
   try {
     const payload = JSON.parse(event.body || "{}");
     const message = String(payload.message || "").trim();
@@ -73,7 +74,7 @@ exports.handler = async (event) => {
     const response = await fetch(GROQ_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${groqApiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
